@@ -3,39 +3,37 @@ import json
 from conf import BASE_DIR
 
 
-USERS = []
-PROBLEMS = []
-LAST_CALL = 0
+class Problem:
+    problems = []
+
+    def get_problems(self):
+        return self.problems[:]
+
+    def set_problems(self, prob):
+        self.problems = prob
+
+    def save_problems(self):
+        with open(BASE_DIR / "static" / "problems.json", "w", encoding="utf-8") as f:
+            json.dump(self.problems, f, indent=2)
+        with open(BASE_DIR / "static" / "problems.txt", "w", encoding="utf-8") as f:
+            json.dump(self.problems, f, indent=2)
 
 
-def set_users(users):
-    global USERS
-    USERS = users
+class Users:
+    users = []
+    last_call = 0
+    user_count = 0
+
+    def set_users(self, users):
+        self.users = users
+        self.user_count = len(users)
+
+    def get_users(self):
+        return self.users[:]
+
+    def get_users_count(self):
+        return self.user_count
 
 
-def get_users():
-    global USERS
-    return USERS[:]
-
-
-def get_users_count():
-    global USERS
-    return len(USERS)
-
-
-def get_problems():
-    global PROBLEMS
-    return PROBLEMS[:]
-
-
-def set_problems(problems):
-    global PROBLEMS
-    PROBLEMS = problems
-
-
-def save_problems():
-    global PROBLEMS
-    with open(BASE_DIR / "static" / "problems.json", "w", encoding="utf-8") as f:
-        json.dump(PROBLEMS, f, indent=2)
-    with open(BASE_DIR / "static" / "problems.txt", "w", encoding="utf-8") as f:
-        json.dump(PROBLEMS, f, indent=2)
+problem_obj = Problem()
+users_obj = Users()

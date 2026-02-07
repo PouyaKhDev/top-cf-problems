@@ -6,7 +6,7 @@ import json
 import logging
 
 
-import model
+from model import problem_obj, users_obj
 from conf import (
     BASE_URL,
     USER_MIN_RATING,
@@ -47,7 +47,7 @@ def fetch_users() -> None:
             if len(users) > USER_COUNT:
                 users = users[:USER_COUNT]
 
-            model.set_users(users)
+            users_obj.set_users(users)
         else:
             logging.info(f"Error fetching users.")
     except Exception as e:
@@ -57,7 +57,7 @@ def fetch_users() -> None:
 
 
 async def fetch_and_save_problems():
-    users = model.get_users()
+    users = users_obj.get_users()
     urls = [
         f"https://codeforces.com/api/user.status?handle={handle}" for handle in users
     ]
@@ -126,20 +126,17 @@ async def fetch_and_save_problems():
     )
 
     if len(unique_problems) > PROBLEM_COUNT:
-        model.set_problems(unique_problems[:PROBLEM_COUNT])
+        problem_obj.set_problems(unique_problems[:PROBLEM_COUNT])
     else:
-        model.set_problems(unique_problems)
+        problem_obj.set_problems(unique_problems)
 
     logging.info(
-        f"Saving top {len(model.get_problems())} problems in 'static/problems.json' and 'static/problems.txt'"
+        f"Saving top {len(problem_obj.get_problems())} problems in 'static/problems.json' and 'static/problems.txt'"
     )
-    model.save_problems()
+    problem_obj.save_problems()
     logging.info("Problems are saved successfully.")
 
 
 def main():
     fetch_users()
     asyncio.run(fetch_and_save_problems())
-
-
-main()
