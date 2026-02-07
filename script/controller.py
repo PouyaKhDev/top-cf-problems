@@ -1,7 +1,8 @@
 import asyncio
 
-from . import view
 from . import model
+from . import view
+from .model import users_obj, problems_obj
 
 from .utils import get_int
 
@@ -26,8 +27,11 @@ def main():
         case -1:
             return
         case 1:
-            model.fetch_users()
-            asyncio.run(model.fetch_and_save_problems())
+            users_obj.fetch_users()
+            asyncio.run(problems_obj.fetch(users_obj.get_users()))
+            problems_obj.process()
+            problems_obj.uniquify()
+            problems_obj.save()
         case 2:
             pass
         case 3:
