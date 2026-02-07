@@ -1,3 +1,3 @@
-import controller
+from script import controller
 
 controller.main()

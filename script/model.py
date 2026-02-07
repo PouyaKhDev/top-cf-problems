@@ -1,13 +1,17 @@
-import requests
-import aiohttp
-import time
-import asyncio
 import json
 import logging
+import requests
+import aiohttp
 
 
-from model import problem_obj, users_obj
-from conf import (
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s: %(message)s",
+)
+
+
+from .conf import (
+    BASE_DIR,
     BASE_URL,
     USER_MIN_RATING,
     USER_MAX_RATING,
@@ -18,12 +22,61 @@ from conf import (
     PROBLEM_MIN_RATING,
     PROBLEM_MAX_RATING,
 )
-from utils import is_in_rating_range, fetch
+from .utils import is_in_rating_range, fetch
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s: %(message)s",
-)
+
+class Problem:
+
+    def __init__(self, *args, **kwargs):
+        self.problems = []
+
+    def get_problems(self):
+        return self.problems[:]
+
+    def set_problems(self, prob):
+        self.problems = prob
+
+    def save_problems(self):
+        with open(BASE_DIR / "static" / "problems.json", "w", encoding="utf-8") as f:
+            json.dump(self.problems, f, indent=2)
+        with open(BASE_DIR / "static" / "problems.txt", "w", encoding="utf-8") as f:
+            json.dump(self.problems, f, indent=2)
+
+
+class Users:
+    def __init__(self, *args, **kwargs):
+        self.users = []
+        self.user_count = 0
+
+    def set_users(self, users):
+        self.users = users
+        self.user_count = len(users)
+
+    def get_users(self):
+        return self.users[:]
+
+    def get_users_count(self):
+        return self.user_count
+
+
+class Menu:
+    def __init__(self) -> None:
+        self.options = {}
+        self.options_count = 0
+
+    def set_menu_options(self, options: list):
+        self.options = options
+        self.options_count = len(options)
+
+    def get_menu(self):
+        return self.options[:]
+
+    def get_menu_option_count(self):
+        return self.options_count
+
+
+problem_obj = Problem()
+users_obj = Users()
 
 
 def fetch_users() -> None:
@@ -135,8 +188,3 @@ async def fetch_and_save_problems():
     )
     problem_obj.save_problems()
     logging.info("Problems are saved successfully.")
-
-
-def main():
-    fetch_users()
-    asyncio.run(fetch_and_save_problems())
