@@ -6,7 +6,7 @@ def show_menu(menu: list, greeting: bool = False):
 
     if greeting:
         print("Welcome to Codeforces problem extractor.".center(width))
-        print("Enter -1 anytime to close the program.".center(width))
+        print("Enter -1 anytime to close the program.\n".center(width))
         print("Choose an option [1-3]:\n")
 
     for i in range(0, len(menu)):

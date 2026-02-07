@@ -30,9 +30,13 @@ def is_in_rating_range(user, min, max) -> bool:
         return False
 
 
-def get_int(mi, ma) -> int | None:
-    try:
+def get_int(mi, ma, message="") -> int | None:
+
+    if message:
+        inp = int(input(message))
+    else:
         inp = int(input("Enter your choice: "))
+    try:
 
         if inp == -1 or (inp >= mi and inp <= ma):
             print("\n")
