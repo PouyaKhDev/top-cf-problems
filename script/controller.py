@@ -1,10 +1,12 @@
 import asyncio
+import sys
+
 
 from . import model
 from . import view
 from .model import users_obj, problems_obj
 
-from .utils import get_int
+from .utils import get_int, get_custom_users
 
 
 def main():
@@ -20,20 +22,33 @@ def main():
     choice = None
     while choice == None:
         choice = get_int(mi, ma)
-    if choice == -1:
-        return
 
     match choice:
         case -1:
-            return
+            sys.exit(0)
         case 1:
             users_obj.fetch_users()
             asyncio.run(problems_obj.fetch(users_obj.get_users()))
             problems_obj.process()
             problems_obj.uniquify()
             problems_obj.save()
-            problems_obj.print_top_5()
+            problems_obj.print_top()
         case 2:
-            pass
+            print(
+                "For adding custom users, open custom_user.txt file and add a comma-separated list of Codeforces handles. exp: tourist, Benq, ..."
+            )
+            print("you can also write handles on multiple lines.\n")
+
+            choice2 = input("Press Enter to continue...")
+
+            if choice2 == -1:
+                sys.exit(0)
+
+            users_obj.set_users(get_custom_users())
+            asyncio.run(problems_obj.fetch(users_obj.get_users()))
+            problems_obj.process()
+            problems_obj.uniquify()
+            problems_obj.save()
+            problems_obj.print_top()
         case 3:
             pass

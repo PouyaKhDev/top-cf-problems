@@ -10,7 +10,7 @@ logging.basicConfig(
 )
 
 
-from .conf import (
+from conf import (
     BASE_DIR,
     BASE_URL,
     USER_MIN_RATING,
@@ -21,6 +21,7 @@ from .conf import (
     PROBLEM_COUNT,
     PROBLEM_MIN_RATING,
     PROBLEM_MAX_RATING,
+    NUMBER_OF_PRINTING_PROBLEMS,
 )
 from .utils import is_in_rating_range, fetch
 
@@ -39,7 +40,7 @@ class Problems:
 
     def save(self):
         logging.info(
-            f"Maximum of {PROBLEM_COUNT} top problems (you can change it in settings), are being saved in 'problems.json' and 'problems.txt'"
+            f"{max(PROBLEM_COUNT,len(self.problems))} top problems (you can change it in settings), are being saved in 'problems.json' and 'problems.txt'"
         )
 
         if len(self.problems) > PROBLEM_COUNT:
@@ -47,6 +48,7 @@ class Problems:
 
         with open(BASE_DIR / "problems.json", "w", encoding="utf-8") as f:
             json.dump(self.problems, f, indent=2)
+
         with open(BASE_DIR / "problems.txt", "w", encoding="utf-8") as f:
             json.dump(self.problems, f, indent=2)
 
@@ -61,10 +63,13 @@ class Problems:
             async with aiohttp.ClientSession() as session:
                 for url in urls:
                     data = await fetch(session, url)
-                    results.extend(data["result"])
+                    data = data["result"]
+                    for sub in data:
+                        sub["problem"]["handle"] = url.split("=")[1]
 
+                    results.extend(data)
                     logging.info(
-                        f"{len(data["result"])} problems are fetched from this handle: {url.split("=")[1]}"
+                        f"{len(data)} problems are fetched from this handle: {url.split("=")[1]}"
                     )
         except aiohttp.ClientError as e:
             logging.info(f"Request failed: {e}")
@@ -94,28 +99,33 @@ class Problems:
                 "rating": sub["problem"]["rating"],
                 "id": f"{sub["problem"]["contestId"]}#{sub["problem"]["index"]}",
                 "url": f"https://codeforces.com/contest/{sub["contestId"]}/problem/{sub["problem"]["index"]}",
+                "handle": sub["problem"]["handle"],
             }
 
             prob.append(pr)
-        prob.sort(key=lambda p: p["id"])
 
         logging.info(f"{len(prob)} problems have been processed.")
         self.problems = prob
 
     def uniquify(self):
         logging.info("Creating a unique list of problems with number of solvers.")
+        self.problems.sort(key=lambda p: p["id"])
 
         # format : [{count, prolem}]
         unique_problems = []
+        cur_handles = set()
         cur_id = ""
         cur_ind = -1
         for problem in self.problems:
             if problem["id"] == cur_id:
-                unique_problems[cur_ind]["count"] += 1
+                if problem["handle"] not in cur_handles:
+                    unique_problems[cur_ind]["count"] += 1
             else:
+                cur_handles.clear()
                 cur_ind += 1
                 cur_id = problem["id"]
                 unique_problems.append({"count": 1, "problem": problem})
+            cur_handles.add(problem["handle"])
         unique_problems.sort(key=lambda p: p["count"], reverse=True)
 
         logging.info(
@@ -123,17 +133,22 @@ class Problems:
         )
         self.problems = unique_problems
 
-    def print_top_5(self):
+    def print_top(self):
         logging.info(
-            "Printig top 5 problems... (full problem list is in problems.json and problesm.txt)"
+            f"Printig top {NUMBER_OF_PRINTING_PROBLEMS} problems... (full problem list is in problems.json and problems.txt)\n"
         )
-        for pr in self.problems[:5]:
+
+        print("#####################################################################\n")
+        for pr in self.problems[:NUMBER_OF_PRINTING_PROBLEMS]:
             print(f"Problem: {pr["problem"]["url"]}")
-            print(f"Number of solvers: {pr["count"]}")
+            print(f"Number of solvers: {pr["count"]}\n")
+            print(
+                "#####################################################################\n"
+            )
 
 
 class Users:
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         self.users = []
         self.user_count = 0
 
@@ -169,6 +184,7 @@ class Users:
                     users = users[:USER_COUNT]
 
                 self.set_users(users)
+                self.user_count = len(users)
             else:
                 logging.info(f"Error fetching users.")
         except Exception as e:
