@@ -123,6 +123,14 @@ class Problems:
         )
         self.problems = unique_problems
 
+    def print_top_5(self):
+        logging.info(
+            "Printig top 5 problems... (full problem list is in problems.json and problesm.txt)"
+        )
+        for pr in self.problems[:5]:
+            print(f"Problem: {pr["problem"]["url"]}")
+            print(f"Number of solvers: {pr["count"]}")
+
 
 class Users:
     def __init__(self, *args, **kwargs):

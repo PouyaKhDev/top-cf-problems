@@ -32,6 +32,7 @@ def main():
             problems_obj.process()
             problems_obj.uniquify()
             problems_obj.save()
+            problems_obj.print_top_5()
         case 2:
             pass
         case 3:
