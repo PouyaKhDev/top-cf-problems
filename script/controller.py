@@ -35,6 +35,9 @@ def main():
             print(
                 "For adding custom users, open custom_user.txt file and add a comma-separated list of Codeforces handles. exp: tourist, Benq, ..."
             )
+            print(
+                "if you didn't add the users before, you can add them now and then press enter."
+            )
             print("you can also write handles on multiple lines.\n")
 
             choice2 = input("Press Enter to continue...")
